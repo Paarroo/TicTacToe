@@ -1,18 +1,25 @@
 # frozen_string_literal: true
 
 class Player
-  attr_accessor :name_player, :nb_player
+  attr_accessor :name, :symbol
 
-  def initialize
-    @nb_player = nb_player_array << gets.chomp.to_i
-    @name_player = name_player_array << gets.chomp.to_i
+  def initialize(name, symbol)
+    @name = name
+    @symbol = symbol
   end
 
-  def round(_player_x)
-    @nb_player.each do |i, @name_player|
-      puts "gets player #{i+1} name"
+  def self.create_players
+    players = []
+    symbols = ['🌚', '🌝'].shuffle
+
+    2.times do |i|
+      puts "Player #{i + 1}, what is your name ?"
+      print '> '
+      name = gets.chomp
+      symbol = symbols.sample
+      symbols.delete(symbol)
+      players << Player.new(name, symbol)
+      puts "#{name} play with #{symbol}"
     end
   end
-
-  def method_name(args); end
 end
