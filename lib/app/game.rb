@@ -1,28 +1,64 @@
 # frozen_string_literal: true
 
-#  cette classe s'occupe de gérer toute la partie. À l'initialisation elle crée 2 instances de Player, et 1 instance de Board.
-# Variables d'instance : tu peux lui rattacher les 2 players (sous forme d'un array), le Board, et des informations annexes comme "quel joueur doit jouer ?", "quel est le statut de la partie (en cours ? player1 a gagné ? etc.)", etc.
-# Méthodes : Game permet de jouer un tour (demande au joueur ce qu'il veut faire et rempli la case), s'occupe de finir la partie si un joueur a gagné et propose aux joueurs de faire une nouvelle partie ensuite.
-require 'bundler'
-Bundler.require
+class Game
+  def initialize
+    @board = Board.new
+    @players = Player.create_players
+  end
 
-$LOAD_PATH.unshift File.expand_path('lib', __dir__)
-require 'application'
-require 'player'
-require 'board'
+  def victory
+    win = [
+      # Lines
+      ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9'],
+        # Columns
+        ['1', '4', '7'],
+        ['2', '5', '8'],
+        ['3', '6', '9'],
+        # Diag
+        ['1', '5', '9'],
+        ['3', '5', '7']
+      ]
+    win.each do |align|
+      values = align.map { |pos| @board.instance_variable_get(:@cases)[pos] }
+      if values.uniq.length == 1 && values[0] != ' '
+        return values[0] # Return win symb
+      end
+    end
 
-player1 = Player.new('Robert')
-player2 = Player.new('Jasmine')
+    nil # no win
+  end
 
-player1.get_symbol
-player2.get_symbol
+  def play
+    # player_turn
+    @current_player_index = 0
 
-board = Board.new
-puts board.plateau
+    loop do
+      current_player = @players[@current_player_index]
+      @board.display_grid
+      puts "#{current_player.name}, where do you want to place your symbole #{current_player.symbol} ?"
+      position = gets.chomp.to_i
 
-plateau = board.plateau
-plateau.each { |bloc| print bloc.name }
-puts ''
+      success = @board.place_symbol(position, current_player.symbol)
+      if success
+        # Victory_case
+          winner_symbol = victory
+        if winner_symbol
+          @board.display_grid
+          winner = @players.find { |player| player.symbol == winner_symbol }
+          puts "\n🥳 #{winner.name} wins with #{winner_symbol} ! 🎉"
+          break
+        end
+        @current_player_index = (@current_player_index + 1) % 2
+      # = 2 % 2 = 0  → Joueur 1
+      # = 1 % 2 = 1 → Joueur 2
+      # if @current_player_index == 0 → @current_player_index = 1
+      # else → @current_player_index = 0
+      else
+        puts 'Position already taken! Try again.'
 
-board.play_turn1(player1)
-# board.play_turn(player1)
+      end
+    end
+  end
+end

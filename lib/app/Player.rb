@@ -21,5 +21,6 @@ class Player
       players << Player.new(name, symbol)
       puts "#{name} play with #{symbol}"
     end
+    players
   end
 end
