@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'colorize'
+
 class Board
   def initialize
     @cases = {}
@@ -10,11 +12,14 @@ class Board
   end
 
   def display_grid
-    puts " #{@cases['1'] == ' ' ? '1' : @cases['1']} | #{@cases['2'] == ' ' ? '2' : @cases['2']} | #{@cases['3'] == ' ' ? '3' : @cases['3']} "
-    puts '-----------'
-    puts " #{@cases['4'] == ' ' ? '4' : @cases['4']} | #{@cases['5'] == ' ' ? '5' : @cases['5']} | #{@cases['6'] == ' ' ? '6' : @cases['6']} "
-    puts '-----------'
-    puts " #{@cases['7'] == ' ' ? '7' : @cases['7']} | #{@cases['8'] == ' ' ? '8' : @cases['8']} | #{@cases['9'] == ' ' ? '9' : @cases['9']} "
+    puts "\n" + "  🎯 GAME BOARD 🎯".bold.cyan
+    puts ""
+    puts "     #{format_cell('1')} │ #{format_cell('2')} │ #{format_cell('3')}".light_blue
+    puts "   ━━━━━━━━━━━━━━━".light_blue
+    puts "     #{format_cell('4')} │ #{format_cell('5')} │ #{format_cell('6')}".light_blue
+    puts "   ━━━━━━━━━━━━━━━".light_blue
+    puts "     #{format_cell('7')} │ #{format_cell('8')} │ #{format_cell('9')}".light_blue
+    puts ""
   end
 
   def place_symbol(position, symbol)
@@ -23,6 +28,33 @@ class Board
       true
     else
       false
+    end
+  end
+
+  def board_full?
+    @cases.values.none? { |case_value| case_value == ' ' }
+  end
+
+  def valid_position?(position)
+    position.between?(1, 9) && @cases[position.to_s] == ' '
+  end
+
+  def get_cell(position)
+    @cases[position.to_s]
+  end
+
+  private
+
+  def format_cell(position)
+    cell_value = @cases[position]
+    if cell_value == ' '
+      position.bold.white
+    elsif cell_value == '🌚'
+      cell_value.bold.blue
+    elsif cell_value == '🌝'
+      cell_value.bold.yellow
+    else
+      cell_value.bold.magenta
     end
   end
 end

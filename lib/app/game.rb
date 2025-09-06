@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'ui'
+
 class Game
   def initialize
     @board = Board.new
@@ -7,58 +9,89 @@ class Game
   end
 
   def victory
-    win = [
-      # Lines
+    winning_combinations = [
+      # Rows
       ['1', '2', '3'],
-        ['4', '5', '6'],
-        ['7', '8', '9'],
-        # Columns
-        ['1', '4', '7'],
-        ['2', '5', '8'],
-        ['3', '6', '9'],
-        # Diag
-        ['1', '5', '9'],
-        ['3', '5', '7']
-      ]
-    win.each do |align|
-      values = align.map { |pos| @board.instance_variable_get(:@cases)[pos] }
+      ['4', '5', '6'],
+      ['7', '8', '9'],
+      # Columns
+      ['1', '4', '7'],
+      ['2', '5', '8'],
+      ['3', '6', '9'],
+      # Diagonals
+      ['1', '5', '9'],
+      ['3', '5', '7']
+    ]
+    
+    winning_combinations.each do |combination|
+      values = combination.map { |position| @board.get_cell(position) }
       if values.uniq.length == 1 && values[0] != ' '
-        return values[0] # Return win symb
+        return values[0] # Return winning symbol
       end
     end
 
-    nil # no win
+    nil # No winner
   end
 
   def play
-    # player_turn
     @current_player_index = 0
 
     loop do
       current_player = @players[@current_player_index]
+      UI.clear_screen
       @board.display_grid
-      puts "#{current_player.name}, where do you want to place your symbole #{current_player.symbol} ?"
-      position = gets.chomp.to_i
+      UI.current_player_prompt(current_player.name, current_player.symbol)
+      
+      position = get_valid_position
 
-      success = @board.place_symbol(position, current_player.symbol)
-      if success
-        # Victory_case
-          winner_symbol = victory
-        if winner_symbol
-          @board.display_grid
-          winner = @players.find { |player| player.symbol == winner_symbol }
-          puts "\n🥳 #{winner.name} wins with #{winner_symbol} ! 🎉"
+      # Place symbol (we know it's valid now)
+      @board.place_symbol(position, current_player.symbol)
+      
+      # Check for victory
+      winner_symbol = victory
+      if winner_symbol
+        UI.clear_screen
+        @board.display_grid
+        winner = @players.find { |player| player.symbol == winner_symbol }
+        UI.victory_animation(winner.name, winner.symbol)
+        return winner # Return winner for game over menu
+      end
+      
+      # Check for draw
+      if @board.board_full?
+        UI.clear_screen
+        @board.display_grid
+        UI.draw_message
+        return nil # Return nil for draw
+      end
+      
+      # Switch player
+      @current_player_index = (@current_player_index + 1) % 2
+    end
+  end
+
+  private
+
+  def get_valid_position
+    position = nil
+    loop do
+      print '> '
+      input = gets
+      return 1 if input.nil? # Default to position 1 if no input
+      input = input.chomp
+      
+      # Check if input is a number
+      if input.match?(/\A\d+\z/)
+        position = input.to_i
+        if @board.valid_position?(position)
           break
+        else
+          UI.invalid_input_message
         end
-        @current_player_index = (@current_player_index + 1) % 2
-      # = 2 % 2 = 0  → Joueur 1
-      # = 1 % 2 = 1 → Joueur 2
-      # if @current_player_index == 0 → @current_player_index = 1
-      # else → @current_player_index = 0
       else
-        puts 'Position already taken! Try again.'
-
+        UI.invalid_input_message
       end
     end
+    position
   end
 end

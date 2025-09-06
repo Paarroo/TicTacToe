@@ -10,17 +10,23 @@ class Player
 
   def self.create_players
     players = []
-    symbols = ['🌚', '🌝'].shuffle
 
+    # Collect player names first
     2.times do |i|
       puts "Player #{i + 1}, what is your name ?"
       print '> '
-      name = gets.chomp
-      symbol = symbols.sample
-      symbols.delete(symbol)
-      players << Player.new(name, symbol)
-      puts "#{name} play with #{symbol}"
+      input = gets
+      name = input ? input.chomp : "Player#{i + 1}"
+      players << Player.new(name, nil)  # Symbol assigned later
     end
+
+    # Randomly assign symbols using optimal shuffle method
+    symbols = ['🌚', '🌝'].shuffle
+    players.each_with_index do |player, i|
+      player.symbol = symbols[i]
+      puts "#{player.name} plays with #{player.symbol}! 🎯"
+    end
+    
     players
   end
 end

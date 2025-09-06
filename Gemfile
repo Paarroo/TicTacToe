@@ -1,15 +1,16 @@
 # frozen_string_literal: true
 
 source 'https://rubygems.org'
-ruby '3.4.4'
-gem 'dotenv'
-gem 'http'
-gem 'json'
-gem 'nokogiri'
-gem 'open-uri'
+ruby '3.4.5'
+
+# Interface enhancement
+gem 'colorize'
+
+# Development and debugging
 gem 'pry'
-gem 'reline'
+
+# Testing
 gem 'rspec'
+
+# Code quality
 gem 'rubocop'
-gem 'selenium-webdriver'
-gem 'watir'
